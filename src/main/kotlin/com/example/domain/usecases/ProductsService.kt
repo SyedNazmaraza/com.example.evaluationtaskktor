@@ -11,7 +11,12 @@ import com.example.utils.gettingData
 class ProductsService(private val repo: ProductsRepository) {
 
     suspend fun getAllProducts(): BaseResponse<Products> {
-        return gettingData()
+        val data = gettingData()
+         if (data is BaseResponse.SuccessResponse){
+             data.data.products.forEach { repo.addProduct(it) }
+             return data
+         }
+        return data
     }
 
     suspend fun searchProducts(request: Request): BaseResponse<List<Product>> {
