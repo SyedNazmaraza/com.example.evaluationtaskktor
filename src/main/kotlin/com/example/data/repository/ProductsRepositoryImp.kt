@@ -102,38 +102,61 @@ class ProductsRepositoryImp:ProductsRepository {
 
     override suspend fun updateProduct(newProduct: Update): BaseResponse<Product> {
         return try {
-            dbQuery {
-                val query = ProductsTable.update({ProductsTable.id eq newProduct.id!!}){
-                    if (newProduct.title!=null){ it[title] = newProduct.title!! }
-                    if (newProduct.category!=null){ it[category] = newProduct.category!! }
-                    if (newProduct.description!=null){ it[description] = newProduct.description!! }
-                    if (newProduct.brand!=null){ it[brand] = newProduct.brand!! }
-                    if (newProduct.discountPercentage!=null){ it[discountPercentage] = newProduct.discountPercentage!!}
-                    if (newProduct.images!=null){ it[images] = newProduct.images!!.toString() }
-                    if (newProduct.price!=null){ it[price] = newProduct.price!! }
+            val query = dbQuery {
+                ProductsTable.update({ ProductsTable.id eq newProduct.id!! }) {
+                    if (newProduct.title != null) {
+                        it[title] = newProduct.title!!
+                    }
+                    if (newProduct.category != null) {
+                        it[category] = newProduct.category!!
+                    }
+                    if (newProduct.description != null) {
+                        it[description] = newProduct.description!!
+                    }
+                    if (newProduct.brand != null) {
+                        it[brand] = newProduct.brand!!
+                    }
+                    if (newProduct.discountPercentage != null) {
+                        it[discountPercentage] = newProduct.discountPercentage!!
+                    }
+                    if (newProduct.images != null) {
+                        it[images] = newProduct.images!!.toString()
+                    }
+                    if (newProduct.price != null) {
+                        it[price] = newProduct.price!!
+                    }
 //                    it[price] = newProduct.price?:ProductsTable.select{ id eq newProduct.id!! }.first().toProduct().price
-                    if (newProduct.rating!=null){ it[rating] = newProduct.rating!! }
-                    if (newProduct.stock!=null){ it[stock] = newProduct.stock!! }
-                    if (newProduct.thumbnail!=null){ it[thumbnail] = newProduct.thumbnail!! }
-                }>0
-                if (query){
-                    dbQuery {
-                        val product = ProductsTable.select(ProductsTable.id eq newProduct.id!!).first().toProduct()
-                        BaseResponse.SuccessResponse<Product>(product)
+                    if (newProduct.rating != null) {
+                        it[rating] = newProduct.rating!!
+                    }
+                    if (newProduct.stock != null) {
+                        it[stock] = newProduct.stock!!
+                    }
+                    if (newProduct.thumbnail != null) {
+                        it[thumbnail] = newProduct.thumbnail!!
                     }
                 }
-                else{
-                    BaseResponse.ErrorResponse(errorCodes = ErrorCodes.UPDATE_ERROR, mess = ErrorCodes.UPDATE_ERROR.mes)
+            } > 0
+             if (query) {
+                return dbQuery {
+                    val product = ProductsTable.select(ProductsTable.id eq newProduct.id!!).first().toProduct()
+                    BaseResponse.SuccessResponse<Product>(product)
                 }
             }
+            return BaseResponse.ErrorResponse(errorCodes = ErrorCodes.UPDATE_ERROR, mess = ErrorCodes.UPDATE_ERROR.mes)
         }
-        catch (e:Exception){
-            when(e){
-                is ExposedSQLException -> BaseResponse.ErrorResponse(ErrorCodes.DATABASE_ERROR,mess = ErrorCodes.DATABASE_ERROR.mes)
-                is NoSuchElementException -> BaseResponse.ErrorResponse(ErrorCodes.UPDATE_ERROR,mess = ErrorCodes.UPDATE_ERROR.mes)
-                else -> BaseResponse.ErrorResponse(ErrorCodes.DATABASE_ERROR,mess = ErrorCodes.DATABASE_ERROR.mes)
+        catch (e: Exception) {
+            when (e) {
+                is ExposedSQLException -> BaseResponse.ErrorResponse(
+                    ErrorCodes.DATABASE_ERROR,
+                    mess = ErrorCodes.DATABASE_ERROR.mes
+                )
+                is NoSuchElementException -> BaseResponse.ErrorResponse(
+                    ErrorCodes.UPDATE_ERROR,
+                    mess = ErrorCodes.UPDATE_ERROR.mes
+                )
+                else -> BaseResponse.ErrorResponse(ErrorCodes.DATABASE_ERROR, mess = ErrorCodes.DATABASE_ERROR.mes)
             }
-
         }
     }
 }
